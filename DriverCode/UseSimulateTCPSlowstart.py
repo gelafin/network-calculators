@@ -8,7 +8,7 @@ if __name__ == '__main__':
     # known
     mss_bytes = 1460
     slowstart_congestion_window_limit_bytes = 11680
-    packet_count = 15
+    packet_count = 16  # add 1 to see what the congestion window would be after this packet
 
     result = simulate_tcp_slowstart(mss_bytes, slowstart_congestion_window_limit_bytes, packet_count)
     print('\nslow start simulation results:\n', json.dumps(result, indent=4))

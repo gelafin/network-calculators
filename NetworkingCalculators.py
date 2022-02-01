@@ -448,7 +448,8 @@ def simulate_tcp_slowstart(mss_bytes: int, slow_start_congestion_window_limit_by
         packet_group_bytes = 0
         packet_group_numbers = []
         packet_number_out = packet_index + 1  # start numbering from 1
-        while packet_group_bytes <= current_congestion_window_bytes - packet_size_bytes:  # while there's still room
+        while (packet_group_bytes <= current_congestion_window_bytes - packet_size_bytes
+               and packet_number_out - 1 < packet_count):  # while there's still room (and waiting packets)
             # add a packet
             packet_group_numbers.append(packet_number_out)
 

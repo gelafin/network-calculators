@@ -62,7 +62,8 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
     # make a list (heapq for efficiency) of turn-order indices of files in size order (small to large)
     file_order_indices_by_needed_packets_asc = []
     for turn_order, packet_count in enumerate(needed_packets):
-        heappush(file_order_indices_by_needed_packets_asc, (packet_count, turn_order))  # sort by size but pair with index
+        heappush(file_order_indices_by_needed_packets_asc,
+                 (packet_count, turn_order))  # sort by size but pair with index
         #                                                                       (docs say turn_order is a tie-breaker)
 
     # Calculate the number of packets that will have been sent when each file finishes transmitting,
@@ -87,8 +88,10 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
         total_packets_at_previous_done = total_packets_at_each_file_done[index - 1]
 
         # calculate total packets this file will wait for
-        remaining_packets_this_file_at_previous_done = total_packets_needed_this_file - (total_packets_at_previous_done / sharing_computers_count)
-        total_packets_to_finish_this_file_at_previous_done = remaining_packets_this_file_at_previous_done * (sharing_computers_count - index)
+        remaining_packets_this_file_at_previous_done = total_packets_needed_this_file - (
+                total_packets_at_previous_done / sharing_computers_count)
+        total_packets_to_finish_this_file_at_previous_done = remaining_packets_this_file_at_previous_done * (
+                sharing_computers_count - index)
         total_packets_at_file_done = total_packets_to_finish_this_file_at_previous_done + total_packets_at_previous_done
 
         # calculate total time for this file to finish
@@ -105,8 +108,7 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
     return times_at_each_packet_done_seconds
 
 
-
-def calculate_utilization_circuit_switched(total_user_count : int, utilization_per_user: list[dict]):
+def calculate_utilization_circuit_switched(total_user_count: int, utilization_per_user: list[dict]):
     """
     Calculates total utilization in a circuit-switched network with equal bandwidth share among users
     :param total_user_count: number of users sharing equal bandwidth
@@ -365,3 +367,54 @@ def calculate_end_to_end_voip_delay(known_data: dict):
     return voip_delay_ms
 
 
+def calculate_tcp_timeout_interval_ms(estimated_rtt_ms: int | float, dev_rtt_ms: int | float,
+                                      deviation_margin_multiplier: int | float = 4
+                                      ):
+    """
+    Calculates timeout interval as EstimatedRTT + Margin * DevRTT
+    :param estimated_rtt_ms: estimated round-trip time, in milliseconds
+    :param dev_rtt_ms: deviation of round-trip-time data, in milliseconds
+    :param deviation_margin_multiplier: (optional) multiplier to use for deviation margin other than 4
+    :return: timeout interval, in milliseconds
+    """
+    return estimated_rtt_ms + deviation_margin_multiplier * dev_rtt_ms
+
+
+def calculate_dev_rtt_ms(previous_dev_rtt_ms: int | float, sample_rtt_ms: int | float,
+                         estimated_rtt_ms: int | float, weight_multiplier: int | float = 0.25
+                         ):
+    """
+    Calculates deviation of round-trip time as (1-β)prev_DevRTT + β(SampleRTT - EstimatedRTT)
+    :param previous_dev_rtt_ms: previously calculated deviation of round-trip-time, in milliseconds
+    :param sample_rtt_ms: recently measured rtt, in milliseconds
+    :param estimated_rtt_ms: estimated round-trip time, in milliseconds
+    :param weight_multiplier: the beta (β) in the equation; multiplier to determine weight of recentness (as EWMA)
+    :return: deviation of round-trip time, in milliseconds
+    """
+    return (1 - weight_multiplier) * previous_dev_rtt_ms + weight_multiplier * (sample_rtt_ms - estimated_rtt_ms)
+
+
+def calculate_est_rtt_ms(previous_estimated_rtt_ms: int | float, sample_rtts_ms: list[int | float],
+                         weight_multiplier: int | float = 0.25, recursion_index: int = 0
+                         ):
+    """
+    Calculates estimated round-trip time as (1-α)EstimatedRTT + (α)SampleRTT
+    :param previous_estimated_rtt_ms: previously calculated estimated round-trip time, in milliseconds
+    :param sample_rtts_ms: list of recently measured round-trip times, in milliseconds. Most recent last
+    :param weight_multiplier: the alpha (α) in the equation; multiplier to determine weight of recentness (as EWMA)
+    :param recursion_index: (used to iterate during recursion)
+    :return: estimated round-trip time, in milliseconds
+    """
+    # base case: no more sample RTTs to use;
+    # return the est RTT calculated from the previous sample RTT as the final result
+    if recursion_index >= len(sample_rtts_ms):
+        return previous_estimated_rtt_ms
+
+    # get a sample RTT
+    this_sample_rtt_ms = sample_rtts_ms[recursion_index]
+
+    # calculate estimated RTT given this sample RTT
+    this_est_rtt_ms = (1 - weight_multiplier) * previous_estimated_rtt_ms + weight_multiplier * this_sample_rtt_ms
+
+    # recursive case: calculate the next est RTT
+    return calculate_est_rtt_ms(this_est_rtt_ms, sample_rtts_ms, weight_multiplier, recursion_index + 1)

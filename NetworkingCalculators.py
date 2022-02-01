@@ -418,3 +418,66 @@ def calculate_est_rtt_ms(previous_estimated_rtt_ms: int | float, sample_rtts_ms:
 
     # recursive case: calculate the next est RTT
     return calculate_est_rtt_ms(this_est_rtt_ms, sample_rtts_ms, weight_multiplier, recursion_index + 1)
+
+
+def simulate_tcp_slowstart(mss_bytes: int, slow_start_congestion_window_limit_bytes: int, packet_count: int,
+                           packet_size_bytes: int = None
+                           ):
+    """
+    Simulates the TCP slow-start phase by calculating changes in congestion window size
+    :param mss_bytes: Maximum Segment Size, in bytes
+    :param slow_start_congestion_window_limit_bytes: congestion window size limit for the slow-start phase, in bytes
+    :param packet_count: how many packets are waiting to be sent
+    :param packet_size_bytes: (optional) size of each packet. If None, packet_size will be set to mss_bytes
+    :return: data for each group, as a list of dicts, each formatted as below.
+             {
+              'group_number': int,
+              'congestion_window_bytes': int,
+              'congestion_window_mss': int,
+              'packets_sent_this_group': list[int]
+              }
+    """
+    data_out = []
+    packet_size_bytes = packet_size_bytes if packet_size_bytes is not None else mss_bytes
+    current_congestion_window_mss = 1
+    current_congestion_window_bytes = mss_bytes * current_congestion_window_mss
+    packet_index = 0
+    group_number = 1
+    while packet_index < packet_count:
+        # form a packet group according to congestion window size
+        packet_group_bytes = 0
+        packet_group_numbers = []
+        packet_number_out = packet_index + 1  # start numbering from 1
+        while packet_group_bytes <= current_congestion_window_bytes - packet_size_bytes:  # while there's still room
+            # add a packet
+            packet_group_numbers.append(packet_number_out)
+
+            # maintain loop
+            packet_group_bytes += packet_size_bytes
+            packet_number_out += 1
+
+        # save this packet group's details for return
+        data_out.append({
+            'group_number': group_number,
+            'congestion_window_mss': current_congestion_window_mss,
+            'congestion_window_bytes': current_congestion_window_bytes,
+            'packets_sent_this_group': packet_group_numbers
+        })
+
+        # increase congestion window size so the next packet group can be bigger
+        if current_congestion_window_bytes >= slow_start_congestion_window_limit_bytes:
+            # increase linearly if at the limit
+            current_congestion_window_mss += 1
+        else:
+            # increase exponentially if not at the limit
+            current_congestion_window_mss *= 2
+
+        # update current_congestion_window_mss's dependent variable
+        current_congestion_window_bytes = mss_bytes * current_congestion_window_mss
+
+        # maintain loop
+        group_number += 1
+        packet_index += len(packet_group_numbers)
+
+    return data_out
+

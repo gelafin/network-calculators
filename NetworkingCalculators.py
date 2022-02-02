@@ -511,3 +511,25 @@ def calculate_TCP_fair_bandwidth_Mbps(total_available_bandwidth_Mbps: int | floa
         data_out.append(app_details_out)
 
     return data_out
+
+
+def calculate_effective_delay_ms(utilization_decimal: int | float, initial_delay_ms: int | float):
+    """
+    Calculates effective delay in a network as Delay = InitialDelay / (1 - Usage).
+    This can be useful to account for the effects of congestion
+    :param utilization_decimal: network utilization, as a decimal number
+    :param initial_delay_ms: initial network delay, in milliseconds
+    :return: effective network delay, in milliseconds
+    """
+    return initial_delay_ms / (1 - utilization_decimal)
+
+
+def calculate_initial_delay_ms(effective_delay_ms: int | float, utilization_when_delay_known_decimal: int | float):
+    """
+    Calculates initial network delay as InitialDelay = Delay (1 - Usage)
+    :param effective_delay_ms: known effective network delay, in milliseconds
+    :param utilization_when_delay_known_decimal: network utilization when effective_delay_ms was measured,
+           as a decimal number
+    :return: initial network delay, in milliseconds
+    """
+    return effective_delay_ms * (1 - utilization_when_delay_known_decimal)

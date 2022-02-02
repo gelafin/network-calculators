@@ -6,8 +6,8 @@ from NetworkingCalculators import calculate_est_rtt_ms
 
 
 if __name__ == '__main__':
-    initial_est_rtt_ms = 50
-    sample_rtts_ms = [30, 40, 20]  # most recent last
+    initial_est_rtt_ms = 34.4
+    sample_rtts_ms = [43.8, 44.9, 17.4]  # most recent last
     weight_multiplier = 0.4
 
     result = calculate_est_rtt_ms(initial_est_rtt_ms, sample_rtts_ms, weight_multiplier)

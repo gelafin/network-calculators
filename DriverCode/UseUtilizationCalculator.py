@@ -10,11 +10,11 @@ if __name__ == '__main__':
     # set test data
     # =============
     known_data = {
-        'length_in_bytes': 1500,
-        'rate_in_Mbps': 100,
-        'rtt_in_ms': 21.4 * 2
+        'length_in_bytes': 1426,
+        'rate_in_Mbps': 18,
+        'rtt_in_ms': 37 * 2  # end-to-end delay * 2
     }
-    window_size_in_bytes = 8948  # set to None if not pipelining
+    window_size_in_bytes = 7887  # set to None if not pipelining
 
     # how many digits --after-- the decimal point should the answers be?
     percentage_precision = 1

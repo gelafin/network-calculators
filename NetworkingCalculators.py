@@ -481,3 +481,33 @@ def simulate_tcp_slowstart(mss_bytes: int, slow_start_congestion_window_limit_by
 
     return data_out
 
+
+def calculate_TCP_fair_bandwidth_Mbps(total_available_bandwidth_Mbps: int | float,
+                                      app_connections: list[dict]) -> list[dict]:
+    """
+    Calculates available bandwidth for each application, according to TCP "fairness" rules
+    :param total_available_bandwidth_Mbps: total bandwidth that needs to be divided, in Mbps
+    :param app_connections: list of dicts, in the following form.
+                            [{'app_name': str, 'connection_count': int}]
+    :return: bandwidth available to each app, in the following form.
+             ['app_name': str, 'bandwidth_Mbps': int]
+    """
+    # calculate the total number of connections
+    total_connection_count = sum([app_details['connection_count'] for app_details in app_connections])
+
+    # calculate available bandwidth for each connection
+    per_connection_bandwidth_Mbps = total_available_bandwidth_Mbps / total_connection_count
+
+    # calculate available bandwidth for each app (which may have multiple connections)
+    data_out = []
+    for app_details_in in app_connections:
+        # copy app name and calculate bandwidth to be allocated to all of this app's connections
+        app_details_out = {
+            'app_name': app_details_in['app_name'],
+            'bandwidth_Mbps': per_connection_bandwidth_Mbps * app_details_in['connection_count']
+        }
+
+        # add to return variable
+        data_out.append(app_details_out)
+
+    return data_out

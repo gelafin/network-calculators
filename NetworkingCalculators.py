@@ -380,17 +380,18 @@ def calculate_tcp_timeout_interval_ms(estimated_rtt_ms: int | float, dev_rtt_ms:
 
 
 def calculate_dev_rtt_ms(previous_dev_rtt_ms: int | float, sample_rtt_ms: int | float,
-                         estimated_rtt_ms: int | float, weight_multiplier: int | float = 0.25
+                         previous_estimated_rtt_ms: int | float, weight_multiplier: int | float = 0.25
                          ):
     """
-    Calculates deviation of round-trip time as (1-β)prev_DevRTT + β(SampleRTT - EstimatedRTT)
+    Calculates deviation of round-trip time as (1-β)prev_DevRTT + β(SampleRTT - prev_EstimatedRTT)
     :param previous_dev_rtt_ms: previously calculated deviation of round-trip-time, in milliseconds
     :param sample_rtt_ms: recently measured rtt, in milliseconds
-    :param estimated_rtt_ms: estimated round-trip time, in milliseconds
+    :param previous_estimated_rtt_ms: estimated round-trip time, in milliseconds
     :param weight_multiplier: the beta (β) in the equation; multiplier to determine weight of recentness (as EWMA)
     :return: deviation of round-trip time, in milliseconds
     """
-    return (1 - weight_multiplier) * previous_dev_rtt_ms + weight_multiplier * (sample_rtt_ms - estimated_rtt_ms)
+    return ((1 - weight_multiplier) * previous_dev_rtt_ms + weight_multiplier *
+            (sample_rtt_ms - previous_estimated_rtt_ms))
 
 
 def calculate_est_rtt_ms(previous_estimated_rtt_ms: int | float, sample_rtts_ms: list[int | float],

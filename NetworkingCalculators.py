@@ -1,7 +1,6 @@
 # Author: Mark Mendez
 # Date: 01/29/2022
-
-
+import heapq
 from math import ceil
 from heapq import heappush
 
@@ -398,7 +397,7 @@ def calculate_est_rtt_ms(previous_estimated_rtt_ms: int | float, sample_rtts_ms:
                          weight_multiplier: int | float = 0.25, recursion_index: int = 0
                          ):
     """
-    Calculates estimated round-trip time as (1-α)EstimatedRTT + (α)SampleRTT
+    Calculates estimated round-trip time as (1-α)PreviousEstimatedRTT + (α)SampleRTT
     :param previous_estimated_rtt_ms: previously calculated estimated round-trip time, in milliseconds
     :param sample_rtts_ms: list of recently measured round-trip times, in milliseconds. Most recent last
     :param weight_multiplier: the alpha (α) in the equation; multiplier to determine weight of recentness (as EWMA)

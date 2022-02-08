@@ -9,13 +9,13 @@ if __name__ == '__main__':
     total_available_bandwidth_Mbps = 5000
     app_connections = [
         {'app_name': 'A',
-         'connection_count': 46
+         'connection_count': 42
          },
         {'app_name': 'B',
-         'connection_count': 4
+         'connection_count': 3
          },
         {'app_name': 'C',
-         'connection_count': 7
+         'connection_count': 14
          },
     ]
 

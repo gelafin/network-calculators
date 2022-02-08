@@ -23,6 +23,78 @@ def mibs_to_bytes(mibs: int | float):
     return mibs * 1024 * 1024  # to KiB to bytes
 
 
+def decimal_ip_address_to_binary(decimal_ip_string: str) -> str:
+    """
+    Converts a dotted-decimal ip address to its binary form
+    :param decimal_ip_string: dotted-decimal ip address
+    :return: ip address in binary
+    """
+    # split dotted-decimal string on the dots to get a list of numbers
+    ip_address_int_list = decimal_ip_string.split('.')
+
+    # convert each int to binary strings
+    ip_address_binary_list = []
+    for index in range(len(ip_address_int_list)):
+        int_string = ip_address_int_list[index]
+        binary = format(int(int_string), 'b')
+
+        # pad with leading 0's to 8 chars
+        full_length = 8
+        missing_digits = full_length - len(binary)
+        padding_0s = ''.join(['0' for _ in range(missing_digits)])
+        binary = padding_0s + binary
+
+        # append space to all but the last number
+        if index < len(ip_address_int_list) - 1:
+            binary += ' '
+
+        ip_address_binary_list.append(binary)
+
+    # convert from list of binary strings to one space-delimited string
+    ip_address_binary_string = ''.join(ip_address_binary_list)
+
+    # trim last space
+    ip_address_binary_string = ip_address_binary_string[:-1]
+
+    return ip_address_binary_string
+
+
+def match_ip_address_prefix(ip_address_binary_string: str, routing_table_binary_string: list[str]) -> int:
+    """
+    Uses longest-prefix ip routing protocol to match an ip address to its closest match in a routing table
+    :param ip_address_binary_string: ip address to route, in binary
+    :param routing_table_binary_string: list of ip address prefixes in a routing table
+    :return: index of the element of routing_table that matches best with ip_address_binary_string,
+             or None, if ip_address_binary_string did not match with the first character of any routing table element
+    """
+    # check each prefix in the routing table to track the longest-matching prefix
+    closest_match_prefix_index = None
+    closest_match_identical_char_count = 0
+    for prefix_index in range(len(routing_table_binary_string)):
+
+        routing_prefix_binary_string = routing_table_binary_string[prefix_index]
+
+        # find position of last matching char to determine how many matching chars there are
+        last_matching_char_index = -1
+        for char_index in range(len(routing_prefix_binary_string)):
+
+            if ip_address_binary_string[char_index] == routing_prefix_binary_string[char_index]:
+                # count this matching char
+                last_matching_char_index += 1
+
+                # if the whole prefix matched, compare to the current closest match
+                current_matching_char_count = last_matching_char_index + 1
+                if (
+                    last_matching_char_index == len(routing_prefix_binary_string) - 1  # matched the whole prefix
+                    and current_matching_char_count > closest_match_identical_char_count  # new longest prefix
+                ):
+                    # this is the new closest match
+                    closest_match_identical_char_count = current_matching_char_count
+                    closest_match_prefix_index = prefix_index
+
+    return closest_match_prefix_index
+
+
 def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> list[tuple]:
     """
     Calculates transmission times for each file, in a continuous alternating-packet transmission network.

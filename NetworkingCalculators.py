@@ -67,7 +67,9 @@ def match_ip_address_prefix(ip_address_binary_string: str, routing_table_binary_
     :return: index of the element of routing_table that matches best with ip_address_binary_string,
              or None, if ip_address_binary_string did not match with the first character of any routing table element
     """
-    # check each prefix in the routing table to track the longest-matching prefix
+    # Check each prefix in the routing table to track the longest-matching prefix.
+    # It's tempting to sort prefixes longest to shortest so iteration can short-circuit after finding one match,
+    #     but then original indices would have to be tracked
     closest_match_prefix_index = None
     closest_match_identical_char_count = 0
     for prefix_index in range(len(routing_table_binary_string)):

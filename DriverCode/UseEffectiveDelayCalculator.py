@@ -8,9 +8,9 @@ from NetworkingCalculators import calculate_effective_delay_ms, calculate_initia
 if __name__ == '__main__':
     # solves questions like "given an effective delay of x ms when utilization is y%,
     #     find effective delay when usage is z%"
-    known_effective_delay_ms = 14.5
-    utilization_when_delay_known_decimal = 0
-    utilization_during_result_delay_decimal = 0.078
+    known_effective_delay_ms = 54
+    utilization_when_delay_known_decimal = 0.19
+    utilization_during_result_delay_decimal = 0.98
 
     initial_delay = calculate_initial_delay_ms(known_effective_delay_ms, utilization_when_delay_known_decimal)
 

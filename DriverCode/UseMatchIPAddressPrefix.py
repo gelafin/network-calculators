@@ -13,12 +13,14 @@ if __name__ == '__main__':
         '10001100 00011011 01011110 00100'
     ]
     default_port = 4
-    ip_address_dotted_decimal = '140.27.93.25'
+    ip_address_dotted_decimal = '155.124.185.14'
 
     # if port numbers are different from indexes, map them. If not, assign empty list
     indexes_to_ports = []
 
     binary_ip = decimal_ip_address_to_binary(ip_address_dotted_decimal)
+    print('\nip address in binary:', binary_ip)
+
     routing_match_index = match_ip_address_prefix(binary_ip, routing_table)
 
     result = routing_match_index

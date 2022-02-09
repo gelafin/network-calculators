@@ -53,9 +53,6 @@ def decimal_ip_address_to_binary(decimal_ip_string: str) -> str:
     # convert from list of binary strings to one space-delimited string
     ip_address_binary_string = ''.join(ip_address_binary_list)
 
-    # trim last space
-    ip_address_binary_string = ip_address_binary_string[:-1]
-
     return ip_address_binary_string
 
 

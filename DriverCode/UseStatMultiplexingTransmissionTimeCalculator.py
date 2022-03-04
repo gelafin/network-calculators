@@ -8,12 +8,12 @@ from NetworkingCalculators import calculate_transmission_time_statistical_multip
 if __name__ == '__main__':
     # test
     known_data = {
-        'total_link_rate_Mbps': 5.2,
+        'total_link_rate_Mbps': 37.6,
         'sharing_computers_count': 2,  # should match len(file_sizes_bytes). For now, only 1 file per computer
         'starting_time_seconds': 0,
         'file_sizes_bytes': [
-            mibs_to_bytes(3),
-            kibs_to_bytes(165)
+            mibs_to_bytes(11),
+            kibs_to_bytes(36)
         ],
         'packet_payload_size_bytes': 1000,
         'packet_header_size_bytes': 24

@@ -210,7 +210,7 @@ def calculate_utilization_circuit_switched(total_user_count: int, utilization_pe
     return total_utilization_percent
 
 
-def calculate_queuing_delay(packet_size_in_bytes: int, rate_in_Gbps: float, packet_number: int):
+def calculate_queuing_delay_ms(packet_size_in_bytes: int, rate_in_Gbps: float, packet_number: int):
     """
     Calculates network queueing delay
     :param packet_size_in_bytes: bytes per packet
@@ -253,7 +253,7 @@ def calculate_circuit_switched_transmission_time_ms(file_size_in_bytes: int, rat
     return transmission_time_in_ms
 
 
-def calculate_transmission_time_simple(length_in_bytes: int, rate_in_Mbps: float) -> float:
+def calculate_transmission_time_simple_ms(length_in_bytes: int, rate_in_Mbps: float) -> float:
     """
     Calculates network transmission time for a packet
     :param length_in_bytes: size of each packet --in bytes--
@@ -293,7 +293,7 @@ def calculate_network_utilization(known_data: dict, window_size: int = None) -> 
     rtt = float(known_data['rtt_in_ms'])
 
     # calculate transmission time in milliseconds
-    transmission_time = calculate_transmission_time_simple(packet_length, rate)
+    transmission_time = calculate_transmission_time_simple_ms(packet_length, rate)
 
     # calculate total time
     total_time = transmission_time + rtt
@@ -378,8 +378,9 @@ def calculate_propagation_delay_seconds(propagation_distance_km: int | float,
                                         ):
     """
     Calculates propagation delay
-    :param propagation_distance_km:
-    :param propagation_speed_meters_per_second:
+    :param propagation_distance_km: kilometers of propagation distance
+    :param propagation_speed_meters_per_second: dict representing speed in meters per second, using scientific notation
+                                                {'significant_digits': int or float, 'exponent': int or float}
     :return: propagation delay in seconds
     """
     # convert from km to meters
@@ -605,3 +606,32 @@ def calculate_initial_delay_ms(effective_delay_ms: int | float, utilization_when
     :return: initial network delay, in milliseconds
     """
     return effective_delay_ms * (1 - utilization_when_delay_known_decimal)
+
+
+def calculate_end_to_end_delay_packet_switched_ms(
+        packet_size_bytes: int | float, rate_in_Mbps: int | float, packet_number: int | float,
+        propagation_km: int | float, propagation_mps: dict, intermediate_router_count: int):
+    """
+    Calculates end-to-end delay as queueing delay + transmission delay + propagation delay
+    :param packet_size_bytes: size of packet, in bytes
+    :param rate_in_Mbps: network speed, in Mbps
+    :param packet_number: order of this packet in queue. Start at 1 for the first packet
+    :param propagation_km: kilometers of propagation distance
+    :param propagation_mps: propagation speed, in meters per second, as
+    :return: end-to-end delay, in ms
+    """
+    # Queueing delay
+    rate_in_Gbps = rate_in_Mbps / 1000
+    queueing_delay_ms = calculate_queuing_delay_ms(packet_size_bytes, rate_in_Gbps, packet_number)
+
+    # Transmission delay
+    total_hops = intermediate_router_count + 1
+    transmission_time_ms = (
+            calculate_transmission_time_simple_ms(packet_size_bytes, rate_in_Mbps)
+            * total_hops
+    )
+
+    # Propagation delay
+    prop_delay_ms = calculate_propagation_delay_seconds(propagation_km, propagation_mps) * 1000
+
+    return queueing_delay_ms + transmission_time_ms + prop_delay_ms

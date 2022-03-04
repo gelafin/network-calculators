@@ -8,9 +8,9 @@ from NetworkingCalculators import calculate_end_to_end_voip_delay, calculate_pro
 if __name__ == '__main__':
     # test
     known_data = {
-        'conversion_rate_Kbps': 65,
-        'link_transmission_rate_Mbps': 100,
-        'packet_length_bytes': 1500,
+        'conversion_rate_Kbps': 43,
+        'link_transmission_rate_Mbps': 2.3,
+        'packet_length_bytes': 46,
         'propagation_distance_km': 2500,
         'propagation_speed_meters_per_second':
             {'significant_digits': 2.5, 'exponent': 8}  # e.g., 2.5 * 10^8,

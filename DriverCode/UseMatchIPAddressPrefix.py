@@ -7,13 +7,13 @@ from NetworkingCalculators import match_ip_address_prefix, decimal_ip_address_to
 
 if __name__ == '__main__':
     routing_table = [  # use spaces every EIGHT binary digits (e.g., 10001100 00011011 01011101 01)
-        '10001100 00011011 01011101',
-        '10001100 00011011 01011101 000',
-        '10001100 00011011 01011101 01',
-        '10001100 00011011 01011110 00100'
+        '10011110 00011110 10001111',
+        '10011110 00011110 10001111 000',
+        '10011110 00011110 10001111 01',
+        '10011110 00011110 10001110 0001'
     ]
     default_port = 4
-    ip_address_dotted_decimal = '155.124.185.14'
+    ip_address_dotted_decimal = '158.30.142.30'
 
     # if port numbers are different from indexes, map them. If not, assign empty list
     indexes_to_ports = []

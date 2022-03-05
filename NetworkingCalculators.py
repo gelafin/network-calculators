@@ -618,6 +618,7 @@ def calculate_end_to_end_delay_packet_switched_ms(
     :param packet_number: order of this packet in queue. Start at 1 for the first packet
     :param propagation_km: kilometers of propagation distance
     :param propagation_mps: propagation speed, in meters per second, as
+    :param intermediate_router_count: how many routers are in between sender and receiver
     :return: end-to-end delay, in ms
     """
     # Queueing delay
@@ -635,3 +636,33 @@ def calculate_end_to_end_delay_packet_switched_ms(
     prop_delay_ms = calculate_propagation_delay_seconds(propagation_km, propagation_mps) * 1000
 
     return queueing_delay_ms + transmission_time_ms + prop_delay_ms
+
+
+def calculate_bit_time_ms(rate_in_Mbps: int | float):
+    """
+    Calculates time to transmit one bit
+    :param rate_in_Mbps: network speed, in Mbps
+    :return: time it takes to transmit one bit, in ms
+    """
+    # Convert from Mbps to Kbps to bps
+    rate_in_bps = rate_in_Mbps * 1000 * 1000
+
+    # Convert from bps to seconds per bit
+    rate_in_spb = 1 / rate_in_bps
+
+    # Convert to ms
+    rate_in_msbp = rate_in_spb * 1000
+
+    return rate_in_msbp
+
+
+def generate_exponential_backoff_wait_time_seeds_ms(collision_count: int):
+    """
+    Generates the set {0, 1, 2, …, 2^collision_count - 1}, as a list sorted ascending
+    :param collision_count: number of collisions detected
+    :return: list from the set used by a NIC when choosing wait times, each time in ms, ascending
+    """
+    INCLUSIVE = 1
+    nic_set = [number for number in range(0, 2**collision_count - 1 + INCLUSIVE)]
+
+    return nic_set

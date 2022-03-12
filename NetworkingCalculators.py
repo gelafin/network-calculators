@@ -666,3 +666,66 @@ def generate_exponential_backoff_wait_time_seeds_ms(collision_count: int):
     nic_set = [number for number in range(0, 2**collision_count - 1 + INCLUSIVE)]
 
     return nic_set
+
+
+def stuff_bytes(
+        input_string_hex: str, special_chars_table: dict, hex_conversion_table: dict, include_framing_chars: bool
+):
+    """
+    Converts an input string to the escaped, byte-stuffed version.
+    Raises KeyError if provided tables are not complete
+    :param input_string_hex: string of bytes, in hex, space-delimited, formatted like "79h"
+    :param special_chars_table: dict mapping "soh" (start of header), "eot" (end of transmission), and "esc" (escape)
+                                to a list of ASCII strings to substitute for them if found in input_string_hex
+    :param hex_conversion_table: dict mapping special chars and ASCII chars to unique hex bytes
+                                 (all strings, and hex bytes are formatted with the "h" at the end)
+    :param include_framing_chars: whether to add framing chars to output
+    :return: byte-stuffed string, formatted the same as input, also delimited by space, with capital hex letters
+    """
+    # track reversed mapping of hex to only special chars for efficient checking
+    all_special_chars = set(special_chars_table.keys())
+    all_chars_list = list(hex_conversion_table.keys())
+    all_chars_hex_list = list(hex_conversion_table.values())
+    hex_to_special_chars = {
+        all_chars_hex_list[index]: all_chars_list[index] for index in range(len(special_chars_table))
+        if all_chars_list[index] in all_special_chars
+    }
+    all_special_chars_hex = set(hex_to_special_chars.keys())
+
+    # prepare output variable
+    stuffed_string = ''
+
+    if include_framing_chars is not False:
+        # Start with soh, encoded as hex. No need to escape, since this is the real framing char.
+        # Add a space after it
+        stuffed_string += hex_conversion_table['soh'] + ' '
+
+    # convert input string from raw hex to escaped hex
+    for hex_byte_string in input_string_hex.split(sep=' '):
+        # if it's a special char, escape it and then translate to hex using the provided table
+        if hex_byte_string in all_special_chars_hex:
+            special_char = hex_to_special_chars[hex_byte_string]
+            escaped_chars = special_chars_table[special_char]
+            escaped_hex = ''
+            for escaped_char in escaped_chars:
+                # get the hex code
+                escaped_hex += hex_conversion_table[escaped_char]
+
+                # add a space
+                escaped_hex += ' '
+
+            # leave trailing space
+            stuffed_string += escaped_hex
+
+        # else, it's not a special char; copy it to output with no escaping
+        else:
+            stuffed_string += hex_byte_string
+
+            # add a space
+            stuffed_string += ' '
+
+    if include_framing_chars is not False:
+        # End with eot, encoded as hex. No need to escape, since this is the real framing char.
+        stuffed_string += hex_conversion_table['eot']
+
+    return stuffed_string

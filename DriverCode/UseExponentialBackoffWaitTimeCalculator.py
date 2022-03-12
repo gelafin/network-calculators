@@ -5,7 +5,7 @@ from NetworkingCalculators import generate_exponential_backoff_wait_time_seeds_m
 
 
 if __name__ == '__main__':
-    BIT_TIME_MULTIPLIER_CONSTANT = 512
+    BIT_TIME_MULTIPLIER_CONSTANT = 512  # most common standard is 512
 
     collision_count = 10
     link_transmission_rate_Mbps = 10
@@ -23,5 +23,6 @@ if __name__ == '__main__':
         print('range of wait times is\n')
         print(f'\tfrom {smallest_seed_ms} ms * {BIT_TIME_MULTIPLIER_CONSTANT} = {smallest_wait_ms} ms')
         print(f'\tto {largest_seed_ms} ms * {BIT_TIME_MULTIPLIER_CONSTANT} = {largest_wait_ms} ms')
+        print('\nCalculated bit time of %.9fms' % bit_time_ms)
     else:
         print('Unexpected error. Keep calm and remember Jesus saves')
